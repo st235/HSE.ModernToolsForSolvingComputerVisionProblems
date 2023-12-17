@@ -1,0 +1,6 @@
+version: "3.9"
+services:
+  telegram_bot:
+    build: ./telegram_bot
+    environment:
+      TELEGRAM_BOT_TOKEN_ENV: ${TELEGRAM_BOT_TOKEN}

@@ -17,17 +17,13 @@ def segment_an_image(fname):
     data, original_size = normalise_image(rgb_img)
 
     def infer_model_tvmc(data):
-        loaded_lib = tvm.runtime.load_module('./tuned_selfie_multiclass.so')
+        loaded_lib = tvm.runtime.load_module('./library.so')
         module = graph_executor.GraphModule(loaded_lib["default"](tvm.cpu()))
         module.set_input('input_29', tvm.nd.array(data))
         module.run()
+        res["info"] = "Inference time: NaN ms\n"
         return module.get_output(0).numpy()
 
-        # inputs = {"input_29": data, **params}
-        # num_iter = 10
-        # result = tvmc.run(package, device="cpu", inputs=inputs, number=num_iter)
-        # cost = np.array(result.times).mean()
-        # res["info"] = "Inference time: %g ms\n" % (cost * 1000)
     out = infer_model_tvmc(data)
 
     store_image_data(restore_mask(out[0, :, :, 0], original_size), 'background')

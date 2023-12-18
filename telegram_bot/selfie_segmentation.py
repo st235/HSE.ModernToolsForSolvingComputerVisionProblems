@@ -8,7 +8,6 @@ def segment_an_image(fname):
     res = {"info": "", "images": []}
 
     def store_image_data(img, name):
-        print(img.shape)
         res["images"].append((name + '.png', img))
 
     rgb_img = load_image(fname)

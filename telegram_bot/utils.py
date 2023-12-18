@@ -6,7 +6,8 @@ from skimage import io
 
 
 def load_image(image_path: str) -> np.ndarray:
-    return io.imread(image_path)
+    image = io.imread(image_path)
+    return image.astype(np.float32)
 
 
 def restore_mask(image: np.ndarray,

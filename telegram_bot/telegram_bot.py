@@ -4,6 +4,7 @@ import telebot
 
 from selfie_segmentation import segment_an_image
 
+print(os.getenv('TELEGRAM_BOT_TOKEN'))
 bot = telebot.TeleBot(os.getenv('TELEGRAM_BOT_TOKEN'))
 
 

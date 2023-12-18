@@ -1,5 +1,7 @@
-pytelegramBotAPI
-numpy
-matplotlib
-scikit-image
 apache-tvm
+matplotlib
+numpy
+pytelegramBotAPI
+scikit-image
+typing_extensions
+opencv-python

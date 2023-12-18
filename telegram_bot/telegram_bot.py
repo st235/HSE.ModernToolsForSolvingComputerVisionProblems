@@ -1,9 +1,10 @@
+import cv2
 import os
 import telebot
-from skimage import io
-from sobel import apply_tvm_sobel
 
-bot = telebot.TeleBot(os.getenv('TELEGRAM_BOT_TOKEN_ENV'))
+from selfie_segmentation import segment_an_image
+
+bot = telebot.TeleBot(os.getenv('TELEGRAM_BOT_TOKEN'))
 
 
 def handler_sobel(message):
@@ -22,15 +23,15 @@ def handler_sobel(message):
 
         bot.send_message(message.chat.id, "Starting...")
 
-        res = apply_tvm_sobel(downloaded_file_name)
-        
+        res = segment_an_image(downloaded_file_name)
+
         reply = ""
         media = []
-        for i, image in enumerate(res["images"]):
-            name, path = image
+        for i, image_data in enumerate(res["images"]):
+            name, image = image_data
             reply += "{}. {}\n".format(i, name)
             full_path = os.path.join(".", str(message.chat.id), name)
-            io.imsave(full_path, path)
+            cv2.imwrite(full_path, cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
             media.append(
                 telebot.types.InputMediaPhoto(media=open(full_path, "rb"), caption=name)
             )

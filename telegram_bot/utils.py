@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import tvm
 
 from skimage import io
 
@@ -31,14 +30,3 @@ def normalise_image(image: np.ndarray) -> tuple[np.ndarray, tuple[int, int]]:
 
     image = np.expand_dims(image, axis=0)
     return image, (shape[0], shape[1])
-
-
-def load_tvm_parameters(path: str) -> dict[str: tvm.nd.NDArray]:
-    raw_parameters = np.load(path, allow_pickle=True)
-
-    patched_parameters = {}
-
-    for k in raw_parameters.item().keys():
-        patched_parameters[k] = raw_parameters.item().get(k)
-
-    return patched_parameters

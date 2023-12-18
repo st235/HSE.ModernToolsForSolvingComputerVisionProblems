@@ -1,7 +1,8 @@
+import tvm
 import numpy as np
 
-from tvm.driver import tvmc
-from utils import load_image, restore_mask, load_tvm_parameters, normalise_image
+from tvm.contrib import graph_executor
+from utils import load_image, restore_mask, normalise_image
 
 
 def segment_an_image(fname):
@@ -14,18 +15,20 @@ def segment_an_image(fname):
     store_image_data(rgb_img.astype(np.uint8), 'original_image')
 
     data, original_size = normalise_image(rgb_img)
-    params = load_tvm_parameters('parameters.npy')
 
-    def infer_model_tvmc(data, package, params):
-        package = tvmc.TVMCPackage(package_path=package)
-        inputs = {"input_29": data, **params}
-        num_iter = 10
-        result = tvmc.run(package, device="cpu", inputs=inputs, number=num_iter)
-        cost = np.array(result.times).mean()
-        res["info"] = "Inference time: %g ms\n" % (cost * 1000)
-        return result.outputs["output_0"]
+    def infer_model_tvmc(data):
+        loaded_lib = tvm.runtime.load_module('./tuned_selfie_multiclass.so')
+        module = graph_executor.GraphModule(loaded_lib["default"](tvm.cpu()))
+        module.set_input('input_29', tvm.nd.array(data))
+        module.run()
+        return module.get_output(0).numpy()
 
-    out = infer_model_tvmc(data, "package.tar", params)
+        # inputs = {"input_29": data, **params}
+        # num_iter = 10
+        # result = tvmc.run(package, device="cpu", inputs=inputs, number=num_iter)
+        # cost = np.array(result.times).mean()
+        # res["info"] = "Inference time: %g ms\n" % (cost * 1000)
+    out = infer_model_tvmc(data)
 
     store_image_data(restore_mask(out[0, :, :, 0], original_size), 'background')
     store_image_data(restore_mask(out[0, :, :, 1], original_size), 'hair')

@@ -58,3 +58,55 @@ def patch_hair(file_name: str,
     res['image'] = dyed_portrait
 
     return res
+
+
+def patch_background(background_image_path: str,
+                     foreground_image_path: str):
+    res = {"info": "", "image": None}
+
+    background_image = load_image(background_image_path).astype(np.uint8)
+    foreground_image = load_image(foreground_image_path).astype(np.uint8)
+
+    desired_width = int(foreground_image.shape[1])
+    desired_height = int(
+        background_image.shape[0]
+        * (foreground_image.shape[1] / background_image.shape[1])
+    )
+
+    normalised_image, original_size = normalise_image(foreground_image)
+
+    output_masks, time_ms = measure_performance(
+        lambda: perform_segmentation_inference(selfie_segmentation_library, normalised_image))
+
+    background_mask = restore_mask(output_masks[0, :, :, 0], original_size, convert_to_rgb=False)
+
+    # If width scaling resulted in a smaller image
+    # Let's additionally scale it to make height equal
+    # to the original image's height
+    if desired_height < foreground_image.shape[0]:
+        desired_width = int(
+            desired_width * (foreground_image.shape[0] / desired_height)
+        )
+        desired_height = int(foreground_image.shape[0])
+
+    desired_dimensions = (desired_width, desired_height)
+
+    resized_background = cv2.resize(
+        background_image, desired_dimensions, interpolation=cv2.INTER_AREA
+    )
+
+    leftover_width = resized_background.shape[1] - foreground_image.shape[1]
+    leftover_height = resized_background.shape[0] - foreground_image.shape[0]
+
+    cropped_background = resized_background[
+                         leftover_height: leftover_height + foreground_image.shape[0],
+                         leftover_width: leftover_width + foreground_image.shape[1],
+                         ]
+
+    foreground = cv2.bitwise_and(foreground_image, foreground_image, mask=cv2.bitwise_not(background_mask))
+    background = cv2.bitwise_and(cropped_background, cropped_background, mask=background_mask)
+
+    res['info'] = f"Inference took {time_ms} ms."
+    res['image'] = cv2.bitwise_or(foreground, background)
+
+    return res

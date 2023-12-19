@@ -164,6 +164,7 @@ cython_debug/
 # VSCode
 /.vscode/*
 
-# Add all files in tvm_model
+# Add all files in tvm_model and under telegram_bot
 !/tvm_model/*
+!/telegram_bot/*.so
 /tvm_model/.DS_Store

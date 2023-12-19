@@ -21,6 +21,7 @@ You can see the examples below:
 ## Conversion to TVM
 
 The model has been converted to TVM, then tuned, and exported.
+The full results of conversion are included in [`TFLite_Converation.ipynb` notebook file](./utils/TFLite_Convertation.ipynb). 
 
 ### Tuning results
 
@@ -41,7 +42,8 @@ separately. The file with parameters is called [`tvmc_serialised_parameters.npy`
 
 #### Lib.export_library
 
-On the other hand, calling `export_library` allows on compiled `library` allows us to provide
+On the other hand, calling `export_library` allows on compiled `library` allows us to provide baked-in parameters to the library.
+For this reason, the approach has been selected.
 
 ## Bot
 

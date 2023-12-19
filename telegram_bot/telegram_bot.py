@@ -159,7 +159,7 @@ def change_hair_color(message):
 
 
 @bot.message_handler(commands=["change-background"])
-def change_background_color(message):
+def change_background(message):
     assert message is not None
     send = bot.send_message(message.chat.id, "Send a portrait to start.")
     bot.register_next_step_handler(send, handler_change_background_step_one)

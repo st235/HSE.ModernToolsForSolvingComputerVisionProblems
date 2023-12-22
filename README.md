@@ -61,6 +61,34 @@ I tried to export files and work with them (you can find the code in the noteboo
 Exported model lays under [`tvm_model` folder](./tvm_model) and is called `tvm_not_tuned_selfie_multiclass.tar`.
 The file with parameters can be found under the same folder and is called [`tvmc_serialised_parameters.npy`](./tvm_model/tvmc_serialised_parameters.npy).
 
+### Tuning script
+
+_⚠️ Please, do use **Python notebook** as your primary choice and use the script only as a last resort option._
+
+[The script](./tools/tflite_model_converter.py) contains necessary logic to convert and tune **TFLite** model using TVM.
+
+The script has a few arguments, described below:
+
+| Argument                               | Type        | Notes                                        |
+|----------------------------------------|-------------|----------------------------------------------|
+| Positional argument, always goes first | str         | Path to the TFLite model                     |
+| input_shape                            | list of int | Shape of the input layer of the model        |
+| input_tensor                           | str         | Name of the input tensor, `input` by default |
+| input_dtype                            | str         | Type of the input data, `float32` by default |
+| target                                 | str         | Compilation and optimisation target          |
+| run_tuning                             | bool        | Specify, to also run tuning                  |
+
+To use it without fine-tuning you can use the command below:
+
+```bash
+python tflite_model_converter.py ../original_model/selfie_multiclass_256x256.tflite --input_tensor input_29 -is 1 256 256 3 --target llvm
+```
+
+To run it with fine-tuning you need to slightly change the command:
+
+```bash
+python tflite_model_converter.py ../original_model/selfie_multiclass_256x256.tflite --input_tensor input_29 -is 1 256 256 3 --target llvm --run_tuning
+```
 
 ### TVM built-in methods
 

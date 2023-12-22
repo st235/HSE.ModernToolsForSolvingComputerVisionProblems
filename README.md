@@ -18,7 +18,7 @@ You can get an idea of the segmentation masks for every class from the images be
 |-------------------------------------------|-------------------------------------------|---------------------------------------|-----------------------------------------------|
 | ![Body Skin](./docs/model_body_skin.jpeg) | ![Face Skin](./docs/model_face_skin.jpeg) | ![Clothes](./docs/model_clothes.jpeg) | ![Accessories](./docs/model_accessories.jpeg) |
 
-is stored under [`original_model` folder](./original_model).
+The original model can be found under [`original_model` folder](./original_model).
 
 # Working with TVM
 

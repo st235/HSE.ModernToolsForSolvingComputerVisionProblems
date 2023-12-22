@@ -10,7 +10,8 @@ COPY ./requirements.txt /usr/src/telegram_bot/
 COPY ./telegram_bot.py /usr/src/telegram_bot/
 COPY ./selfie_segmentation.py /usr/src/telegram_bot/
 COPY ./utils.py /usr/src/telegram_bot/
-COPY ./library.so /usr/src/telegram_bot/
+COPY ./original_library.so /usr/src/telegram_bot/
+COPY ./tuned_library.so /usr/src/telegram_bot/
 
 RUN python -m pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt

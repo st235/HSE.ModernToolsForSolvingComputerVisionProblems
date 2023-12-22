@@ -2,9 +2,10 @@ import cv2
 import tvm
 import numpy as np
 
-from utils import load_image, restore_mask, normalise_image, perform_segmentation_inference, measure_performance
+from utils import load_image, restore_mask, normalise_image, perform_benchmarking
 
-selfie_segmentation_library = tvm.runtime.load_module('./library.so')
+original_segmentation_library = tvm.runtime.load_module('./original_library.so')
+tuned_segmentation_library = tvm.runtime.load_module('./tuned_library.so')
 
 
 def segment_an_image(file_name: str):
@@ -18,8 +19,11 @@ def segment_an_image(file_name: str):
 
     normalised_image, original_size = normalise_image(rgb_image)
 
-    output_masks, time_ms = measure_performance(
-        lambda: perform_segmentation_inference(selfie_segmentation_library, normalised_image))
+    output_masks, original_time_ms, tuned_time_ms = perform_benchmarking(
+        original_library=original_segmentation_library,
+        tuned_library=tuned_segmentation_library,
+        data=normalised_image
+    )
 
     store_image_data(restore_mask(output_masks[0, :, :, 0], original_size), 'background')
     store_image_data(restore_mask(output_masks[0, :, :, 1], original_size), 'hair')
@@ -28,7 +32,7 @@ def segment_an_image(file_name: str):
     store_image_data(restore_mask(output_masks[0, :, :, 4], original_size), 'clothes')
     store_image_data(restore_mask(output_masks[0, :, :, 5], original_size), 'accessories')
 
-    res['info'] = f"Inference took {time_ms} ms."
+    res['info'] = f"Inference of default model took {original_time_ms} ms.\nInference of tuned model took {tuned_time_ms} ms."
 
     return res
 
@@ -40,8 +44,11 @@ def patch_hair(file_name: str,
     rgb_image = load_image(file_name).astype(np.uint8)
     normalised_image, original_size = normalise_image(rgb_image)
 
-    output_masks, time_ms = measure_performance(
-        lambda: perform_segmentation_inference(selfie_segmentation_library, normalised_image))
+    output_masks, original_time_ms, tuned_time_ms = perform_benchmarking(
+        original_library=original_segmentation_library,
+        tuned_library=tuned_segmentation_library,
+        data=normalised_image
+    )
 
     hair_mask = restore_mask(output_masks[0, :, :, 1], original_size, convert_to_rgb=False)
     mask_height, mask_width = hair_mask.shape[0], hair_mask.shape[1]
@@ -54,7 +61,7 @@ def patch_hair(file_name: str,
 
     dyed_portrait = cv2.addWeighted(rgb_image, 0.9, dyed_hairs, 0.22, 0)
 
-    res['info'] = f"Inference took {time_ms} ms."
+    res['info'] = f"Inference of default model took {original_time_ms} ms.\nInference of tuned model took {tuned_time_ms} ms."
     res['image'] = dyed_portrait
 
     return res
@@ -75,8 +82,11 @@ def patch_background(background_image_path: str,
 
     normalised_image, original_size = normalise_image(foreground_image)
 
-    output_masks, time_ms = measure_performance(
-        lambda: perform_segmentation_inference(selfie_segmentation_library, normalised_image))
+    output_masks, original_time_ms, tuned_time_ms = perform_benchmarking(
+        original_library=original_segmentation_library,
+        tuned_library=tuned_segmentation_library,
+        data=normalised_image
+    )
 
     background_mask = restore_mask(output_masks[0, :, :, 0], original_size, convert_to_rgb=False)
 
@@ -106,7 +116,7 @@ def patch_background(background_image_path: str,
     foreground = cv2.bitwise_and(foreground_image, foreground_image, mask=cv2.bitwise_not(background_mask))
     background = cv2.bitwise_and(cropped_background, cropped_background, mask=background_mask)
 
-    res['info'] = f"Inference took {time_ms} ms."
+    res['info'] = f"Inference of default model took {original_time_ms} ms.\nInference of tuned model took {tuned_time_ms} ms."
     res['image'] = cv2.bitwise_or(foreground, background)
 
     return res

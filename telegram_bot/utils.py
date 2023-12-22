@@ -8,6 +8,14 @@ from tvm.contrib import graph_executor
 from typing import Callable
 
 
+def perform_benchmarking(original_library: tvm.runtime.Module,
+                         tuned_library: tvm.runtime.Module,
+                         data: np.ndarray):
+    _, original_inference_time = __measure_performance(lambda: __perform_segmentation_inference(original_library, data))
+    data, tuned_inference_time = __measure_performance(lambda: __perform_segmentation_inference(tuned_library, data))
+    return data, original_inference_time, tuned_inference_time
+
+
 def load_image(image_path: str) -> np.ndarray:
     image = io.imread(image_path)
     return image.astype(np.float32)
@@ -44,15 +52,15 @@ def normalise_image(image: np.ndarray) -> tuple[np.ndarray, tuple[int, int]]:
     return image, (shape[0], shape[1])
 
 
-def perform_segmentation_inference(library: tvm.runtime.Module,
-                                   data: np.ndarray):
+def __perform_segmentation_inference(library: tvm.runtime.Module,
+                                     data: np.ndarray):
     module = graph_executor.GraphModule(library["default"](tvm.cpu()))
     module.set_input('input_29', tvm.nd.array(data))
     module.run()
     return module.get_output(0).numpy()
 
 
-def measure_performance(executable: Callable) -> tuple:
+def __measure_performance(executable: Callable) -> tuple:
     start_time = time.time_ns()
     result = executable()
     end_time = time.time_ns()

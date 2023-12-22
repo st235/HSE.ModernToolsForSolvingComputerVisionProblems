@@ -61,6 +61,15 @@ I tried to export files and work with them (you can find the code in the noteboo
 Exported model lays under [`tvm_model` folder](./tvm_model) and is called `tvm_not_tuned_selfie_multiclass.tar`.
 The file with parameters can be found under the same folder and is called [`tvmc_serialised_parameters.npy`](./tvm_model/tvmc_serialised_parameters.npy).
 
+### TVM built-in methods
+
+The pair [`lib.export_library`](https://tvm.apache.org/docs/reference/api/python/runtime.html?highlight=export_library#tvm.runtime.Module.export_library) -
+[`tvm.runtime.load_module`](https://tvm.apache.org/docs/reference/api/python/runtime.html?highlight=runtime#tvm.runtime.load_module) can export and then load the model
+as a dynamic library specifically compiled for the hardware.
+
+I preferred this way over **TVMC** as it allows to bake-in the parameters of the model and provide them within the same
+file. This approach is used in the final solution.
+
 ### Tuning script
 
 _⚠️ Please, do use **Python notebook** as your primary choice and use the script only as a last resort option._
@@ -89,15 +98,6 @@ To run it with fine-tuning you need to slightly change the command:
 ```bash
 python tflite_model_converter.py ../original_model/selfie_multiclass_256x256.tflite --input_tensor input_29 -is 1 256 256 3 --target llvm --run_tuning
 ```
-
-### TVM built-in methods
-
-The pair [`lib.export_library`](https://tvm.apache.org/docs/reference/api/python/runtime.html?highlight=export_library#tvm.runtime.Module.export_library) -
-[`tvm.runtime.load_module`](https://tvm.apache.org/docs/reference/api/python/runtime.html?highlight=runtime#tvm.runtime.load_module) can export and then load the model
-as a dynamic library specifically compiled for the hardware.
-
-I preferred this way over **TVMC** as it allows to bake-in the parameters of the model and provide them within the same
-file. This approach is used in the final solution.
 
 # Bot
 
